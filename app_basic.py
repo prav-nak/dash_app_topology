@@ -361,4 +361,4 @@ def update_output_run(nclicks, nx, ny):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8052, mode="external")
+    app.run_server(debug=False, port=8052, mode="external", csrf_protect=False)
