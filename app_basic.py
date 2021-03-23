@@ -17,10 +17,6 @@ from scipy.sparse.linalg import spsolve
 from matplotlib import colors
 import matplotlib.pyplot as plt
 
-# Load data
-df = pd.read_csv('data/stockdata2.csv', index_col=0, parse_dates=True)
-df.index = pd.to_datetime(df['Date'])
-
 # Initialize the app
 app = JupyterDash(__name__)
 app.config.suppress_callback_exceptions = True
