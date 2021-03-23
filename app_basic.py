@@ -295,7 +295,7 @@ def update_output_run(nclicks, nx, ny):
         rmin=5.4
         penal=3.0
         ft=1 # ft==0 -> sens, ft==1 -> dens
-        run_topopt(nelx,nely,volfrac,penal,rmin,ft)
+        #run_topopt(nelx,nely,volfrac,penal,rmin,ft)
 
         figure = {'data': [],
                 'layout': go.Layout(
