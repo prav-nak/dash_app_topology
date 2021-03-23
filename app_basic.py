@@ -1,3 +1,5 @@
+from __future__ import division
+
 import dash
 from jupyter_dash import JupyterDash
 import dash_html_components as html
@@ -7,7 +9,6 @@ import pandas as pd
 import plotly.express as px
 import xarray as xr
 from dash.dependencies import Input, Output, State
-from __future__ import division
 import numpy as np
 import cupy as cp
 import timeit
