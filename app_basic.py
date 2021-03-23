@@ -1,4 +1,5 @@
 import dash
+import JupyterDash
 import dash_html_components as html
 import dash_core_components as dcc
 from plotly import graph_objs as go
@@ -10,7 +11,7 @@ df = pd.read_csv('data/stockdata2.csv', index_col=0, parse_dates=True)
 df.index = pd.to_datetime(df['Date'])
 
 # Initialize the app
-app = dash.Dash(__name__)
+app = JupyterDash.Dash(__name__)
 app.config.suppress_callback_exceptions = True
 
 
