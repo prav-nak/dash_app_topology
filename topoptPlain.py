@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from time import sleep
 # MAIN DRIVER
 import dash
-#from jupyter_dash import JupyterDash
+from jupyter_dash import JupyterDash
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from plotly.graph_objects import Layout
@@ -28,7 +28,7 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 
 # Initialize the app
-app = dash.Dash(__name__)
+app = JupyterDash(__name__)
 server = app.server
 app.config.suppress_callback_exceptions = True
 
