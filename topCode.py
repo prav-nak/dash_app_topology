@@ -9,8 +9,8 @@ from time import sleep
 import pandas as pd
 import numpy as np
 
-import cupy as cp
-import cupyx
+#import cupy as cp
+#import cupyx
 import timeit
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import spsolve
