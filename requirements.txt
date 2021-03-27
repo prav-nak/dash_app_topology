@@ -1,0 +1,4 @@
+pycuda
+jupyter-dash==0.3.0rc1
+dash-bootstrap-components
+transformers
