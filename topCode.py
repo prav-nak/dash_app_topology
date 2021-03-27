@@ -10,13 +10,14 @@ import pandas as pd
 import numpy as np
 
 import cupy as cp
+import cupyx
 import timeit
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import spsolve
 from matplotlib import colors
+from Solver import *
 
-
-def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout):
+def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, library):
     myGlobalStr = ""
     print("Minimum compliance problem with OC")
     print("ndes: " + str(nelx) + " x " + str(nely))
@@ -113,7 +114,7 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout):
 
     free = np.setdiff1d(dofs, fixed)
     # Solution and RHS vectors
-    f = np.zeros((ndof, 1))
+    f = np.zeros((ndof, 1), dtype=float)
     u = np.zeros((ndof, 1))
     # Set load
     if floc == "tr":
@@ -137,7 +138,7 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout):
     dv = np.ones(nely * nelx)
     dc = np.ones(nely * nelx)
     ce = np.ones(nely * nelx)
-    TotalLoops = 100
+    TotalLoops = 1
     nPrint = 20
     PrintFreq = int(TotalLoops / nPrint)
     print("PrintFreq = ", PrintFreq)
@@ -151,7 +152,33 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout):
         # Remove constrained dofs from matrix
         K = K[free, :][:, free]
         # Solve system
-        u[free, 0] = spsolve(K, f[free, 0])
+        if library == "numpy":
+            starttime = timeit.default_timer()
+            u[free, 0] = spsolve(K.tocsr(), f[free, 0])
+            print("Solving time numpy:", timeit.default_timer() - starttime)
+            # print("-----------------------------------------")
+            # print("u[free, 0] = ", u[free, 0])
+            # print(u[free,0].shape)
+            # print("-----------------------------------------")
+
+        #
+        # Cuda solve
+        #
+        else:
+            # Kcu = cupyx.scipy.sparse.coo_matrix(K)
+            # fcu = cp.array(f[free, 0], dtype=float)
+            # #print(fcu + f[free, 0])
+            # starttime = timeit.default_timer()
+            # solcu = cupyx.scipy.sparse.linalg.lsqr(Kcu, fcu) # HERE
+            # print("Solving time cupy:", timeit.default_timer() - starttime)            
+            # # print("-----------------------------------------")
+            # # with cp.cuda.Device(0):
+            # #   print(cp.asnumpy(solcu[0]))
+            # #   print(cp.asnumpy(solcu[0]).shape)
+            # # print("-----------------------------------------")
+            # u[free, 0] = cp.asnumpy(solcu[0])
+            u[free, 0] = cuspsolve(K, f[free, 0])
+
         # Objective and sensitivity
         ce[:] = (
             np.dot(u[edofMat].reshape(nelx * nely, 8), KE)
@@ -181,19 +208,19 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout):
             x.reshape(nelx * nely, 1) - xold.reshape(nelx * nely, 1), np.inf
         )
         # Write iteration history to screen (req. Python 2.6 or newer)
-        print(
-            "it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(
-                loop, obj, (g + volfrac * nelx * nely) / (nelx * nely), change
-            )
-        )
+        # print(
+        #     "it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(
+        #         loop, obj, (g + volfrac * nelx * nely) / (nelx * nely), change
+        #     )
+        # )
         objVal = "%.2f" % obj
         volVal = "%.2f" % ((g + volfrac * nelx * nely) / (nelx * nely))
         changeVal = "%.2f" % change
         myGlobalStr = "iteration : {it} , \t objective: {obj}, \t Volume fraction: {vol}, \t change in volume: {change}".format(
             it=loop, obj=objVal, vol=volVal, change=changeVal
         )
-        if loop % PrintFreq == 0:
-            print(myGlobalStr, file=fout, flush=True)
+        #if loop % PrintFreq == 0:
+        #    print(myGlobalStr, file=fout, flush=True)
 
     return xPhys
 
