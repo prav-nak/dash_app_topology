@@ -213,9 +213,9 @@ app.layout = html.Div(
                             ),
                             style={"height": "45%"},
                         ),
-                        dcc.Interval(
-                            id="my-interval", interval=1000
-                        ),  # one tick each 5 seconds
+                        # dcc.Interval(
+                        #     id="my-interval", interval=1000
+                        # ),  # one tick each 5 seconds
                     ],
                 ),
             ],
@@ -380,13 +380,13 @@ def update_plot(nclicks, bcloc, floc, nx, ny, fx, fy):
     return fig
 
 
-@app.callback(
-    Output("textarea-example-output", "children"), Input("my-interval", "n_intervals")
-)
-def callback_func(interval):
-    with open("filename.txt", "r") as f:
-        val = f.readlines()
-    return html.Div(val)
+# @app.callback(
+#     Output("textarea-example-output", "children"), Input("my-interval", "n_intervals")
+# )
+# def callback_func(interval):
+#     with open("filename.txt", "r") as f:
+#         val = f.readlines()
+#     return html.Div(val)
 
 
 @app.callback(
