@@ -259,7 +259,7 @@ def update_plot(nclicks, bcloc, floc, nx, ny, fx, fy):
             font=dict(family="Courier New, monospace", size=18, color="White"),
         )
 
-        return fig
+        return [fig]
 
     layout = Layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
     fig = go.Figure(
