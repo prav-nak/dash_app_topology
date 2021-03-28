@@ -124,13 +124,13 @@ app._terminate_server_for_port("localhost", 8050)
 
 ## Where can we go from this simple example
 
-Topology optimization can be used ubiquitously whenever there is design involved. One simple practical example (not part of this public repo. Please feel free to reach out to me if interested in this topic.) is as follows:
+Topology optimization can be used ubiquitously whenever there is design involved. One simple practical example (not part of this public repo. Please feel free to reach out to me if interested in this topic.) is:
 
-- Sitting is a static posture that can cause increased stress in the back, neck, arms and legs, and can add a tremendous amount of pressure to the back muscles and spinal discs.
+- Sitting in a static posture can cause increased stress in the back, neck, arms and legs, and can add a tremendous amount of pressure to the back muscles and spinal discs.
 
 - Designing ergonomic furniture can alleviate some of these problems
 
-This can easily be formulated as a combined shape and topology optimization with stress minimization at certain regions of interest as the objective function. A finite element model for can be generated for a concept design shown below. (full details are out of the scope in this POC for sparse solvers on GPUs.). However it highlights the quicker one can go from concept to optimal designs through faster solvers.
+This can easily be formulated as a combined shape and topology optimization with stress minimization at as the objective function. A finite element model can be generated for a concept design shown below. (full details are out of the scope in this POC for sparse solvers on GPUs.). However it highlights the quicker one can go from concept to optimal designs through faster solvers.
 
 ![alt text](chair.gif)
 
