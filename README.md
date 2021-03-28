@@ -124,7 +124,7 @@ app._terminate_server_for_port("localhost", 8050)
 
 ## Where can we go from this simple example
 
-Topology optimization can be used ubiquitously whenever there is design involved. One simple practical example (not implemented as part of this public repo. Please feel free to reach out to me if interested in this topic.) is as follows:
+Topology optimization can be used ubiquitously whenever there is design involved. One simple practical example (not part of this public repo. Please feel free to reach out to me if interested in this topic.) is as follows:
 
 - Sitting is a static posture that can cause increased stress in the back, neck, arms and legs, and can add a tremendous amount of pressure to the back muscles and spinal discs.
 
