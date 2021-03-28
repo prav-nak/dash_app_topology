@@ -1,15 +1,17 @@
 # Topology optimization
 
 - [TL;DR](#tldr)
-- [Heading](#heading-2)
-  - [Sub-heading](#sub-heading-2)
-    - [Sub-sub-heading](#sub-sub-heading-2)
-- [pyCUDA](#heading-1)
-  - [Sparse solvers in CUDA](#sparse-solvers-in-cuda)
-
-# Heading levels
-
-> This is a fixture to test heading levels
+- [Dash app](#dash)
+- [3 ways under the hood](#3-ways-under-the-hood)
+  - [scipy](#scipy)
+  - [CuPy](#cupy)
+  - [pyCUDA](#heading-1)
+    - [Sparse solvers in CUDA](#sparse-solvers-in-cuda)
+- [How to use it](#how-to-use-it)
+  - [Launching dash app](#launching-dash-app)
+  - [From commandline](#from-commandline)
+  - [From Google colab](#from-google-colab)
+- [Where can we go from this simple example](#where-can-we-go-from-this-simple-example)
 
 <!-- toc -->
 
@@ -20,25 +22,25 @@
 - Uses CUDA sparse solvers for solving linear system of equations on GPU
 - A dash webapp is developed that interfaces with the backend physics. This webapp can be called directly from the `google colab`.
 - The code can be run locally from commandline as well without the webapp
+- For larger degrees of freedom, the CUDA version is significantly faster than CPU version. And hence lets you do more design iterations. Typically these PDE constrained problems are compute heavy and people often resort to MPI parallelization. With the advent of free sparse solvers GPUs and free compute environments like google colab, design can be pushed to new limits with faster turnaround times.
 
-## Heading
-
-This is an h1 heading
-
-### Sub-heading
-
-This is an h2 heading
-
-#### Sub-sub-heading
-
-This is an h3 heading
+## Dash app
 
 ![alt text](anim-opt.gif)
 
-## pyCUDA
+## 3 ways under the hood
 
-PyCUDA provides computational linear algebra involving vectors and multi-dimensional arrays that are
-designed to match the interface of the widely-used (CPU-based) Python array package `numpy`.
+### scipy
+
+`scipy` offers various linear solvers. We use `spsolve` from `scipy.sparse.linalg`.
+
+### CuPy
+
+CuPy is designed as NumPy-equivalent library so users can benefit from fast GPU computation without learning CUDA syntax.
+
+### pyCUDA
+
+PyCUDA connects the high-level Python programming language with the Nvidia CUDA compute abstraction. PyCUDA provides computational linear algebra involving vectors and multi-dimensional arrays that are designed to match the interface of the widely-used (CPU-based) Python array package `numpy`.
 
 ### Sparse solvers in CUDA
 
@@ -65,10 +67,66 @@ Attention should be paid to the same input/output parameters are before. In part
 
 Attention should be paid to the input parameter tol, which is used to decide the rank of A.
 
-### Sub-heading
+## How to use it
 
-This is an h2 heading
+### Launching dash app
 
-#### Sub-sub-heading
+- Check out this git repo using jupyter-dash
+- Install the dependencies (dash, pycuda, cupy etc)
+- From the commandline execute `python UI.py`
 
-This is an h3 heading
+### From commandline
+
+- From the commandline execute `python main.py`
+
+### From Google colab
+
+Google colab comes pre-installed with a lot of CUDA libraries. You can serve this dash app from within the colab notebook by using the following commands:
+
+`!pip install -q jupyter-dash==0.3.0rc1 dash-bootstrap-components transformers`
+
+```
+%%sh
+pip install -q dash
+pip install -q dash_core_components
+pip install -q dash_html_components
+pip install -q dash_table
+pip install jupyter-dash
+pip install pycuda
+```
+
+```
+import os
+from pathlib import Path
+from google.colab import drive
+
+drive.mount("/content/gdrive")
+path = Path("/content/gdrive/My Drive/Code")
+path.mkdir(parents=True, exist_ok=True)
+os.chdir(path)
+
+! rm -r dash_app_topology
+! git clone -b separate https://github.com/prav-nak/dash_app_topology.git
+os.chdir("dash_app_topology")
+```
+
+```
+from UI import *
+app.run_server(debug=True, port=8050, mode='external')
+```
+
+If you want to terminate the current running app,
+
+```
+app._terminate_server_for_port("localhost", 8050)
+```
+
+## Where can we go from this simple example
+
+Topology optimization can be used ubiquitously whenever there is design involved. One simple practical example (not implemented as part of this public repo. Please feel free to reach out to me if interested in this topic.) is as follows:
+
+- Sitting is a static posture that can cause increased stress in the back, neck, arms and legs, and can add a tremendous amount of pressure to the back muscles and spinal discs.
+
+- Designing ergonomic furniture can alleviate some of these problems
+
+This can easily be formulated as a combined shape and topology optimization with stress minimization at certain regions of interest as the objective function. A finite element model for can be generated for a concept design as shown below and

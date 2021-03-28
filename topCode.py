@@ -279,3 +279,21 @@ def oc(nelx, nely, x, volfrac, dc, dv, g):
         else:
             l2 = lmid
     return (xnew, gt)
+
+if __name__ == '__main__':
+    nelx = 120
+    nely = 60
+    volfrac=0.4
+    penal=3.0
+    rmin=5.4
+    ft=1
+    floc='tr'
+    fx=0.
+    fy=1.
+    bcloc='l'
+    f=open('filename.txt', 'w+')
+    library='numpy'
+    xPhys = main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, library)
+    plt.imshow(xPhys.reshape((nelx, nely)).T)
+    plt.show()
+    f.close()

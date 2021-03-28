@@ -1,19 +1,18 @@
 from __future__ import division
 
-# MAIN DRIVER
+# System imports
 import math
 import dash
-from jupyter_dash import JupyterDash
+import plotly.express as px
+import dash_core_components as dcc
 import dash_html_components as html
+from plotly import graph_objs as go
+from jupyter_dash import JupyterDash
 import dash_bootstrap_components as dbc
 from plotly.graph_objects import Layout
-import dash_core_components as dcc
-from plotly import graph_objs as go
-import pandas as pd
-import plotly.express as px
-
-# import xarray as xr
 from dash.dependencies import Input, Output, State
+
+# Custom imports
 from topCode import main
 
 # Initialize the app
@@ -213,9 +212,9 @@ app.layout = html.Div(
                             ),
                             style={"height": "45%"},
                         ),
-                        # dcc.Interval(
-                        #     id="my-interval", interval=1000
-                        # ),  # one tick each 5 seconds
+                        dcc.Interval(
+                            id="my-interval", interval=1000
+                        ),  # one tick each 5 seconds
                     ],
                 ),
             ],
@@ -258,7 +257,12 @@ def update_plot(nclicks, bcloc, floc, nx, ny, fx, fy):
             legend_title="Optimal topology",
             font=dict(family="Courier New, monospace", size=18, color="White"),
         )
-
+        fig.update_layout(
+            # width=800,
+            height=400,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
         return fig
 
     layout = Layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
@@ -380,13 +384,13 @@ def update_plot(nclicks, bcloc, floc, nx, ny, fx, fy):
     return fig
 
 
-# @app.callback(
-#     Output("textarea-example-output", "children"), Input("my-interval", "n_intervals")
-# )
-# def callback_func(interval):
-#     with open("filename.txt", "r") as f:
-#         val = f.readlines()
-#     return html.Div(val)
+@app.callback(
+    Output("textarea-example-output", "children"), Input("my-interval", "n_intervals")
+)
+def callback_func(interval):
+    with open("filename.txt", "r") as f:
+        val = f.readlines()
+    return html.Div(val)
 
 
 @app.callback(
@@ -425,6 +429,14 @@ def update_output_run(nclicks, floc, bcloc, nx, ny, fx, fy):
         f.close()
         fig = px.imshow(xPhys.reshape((nelx, nely)).T)
         # fig.update_layout(
+        fig.update_layout(
+            # width=800,
+            height=400,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+        fig.update(layout_coloraxis_showscale=False)
+        fig.update(layout_showlegend=False)
         return fig
 
     else:
@@ -448,13 +460,20 @@ def update_output_run(nclicks, floc, bcloc, nx, ny, fx, fy):
             font=dict(family="Courier New, monospace", size=18, color="White"),
         )
 
+        fig.update_layout(
+            # width=800,
+            height=400,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+
         return fig
 
 
 # The real main driver
 if __name__ == "__main__":
     # # Default input parameters
-    # app._terminate_server_for_port("localhost", 8060)
     f = open("filename.txt", "w+")
     f.close()
-    app.run_server(debug=False, port=8060)
+    app.run_server(debug=True, port=8060)
+    # app._terminate_server_for_port("localhost", 8060)
