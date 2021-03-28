@@ -9,15 +9,24 @@ from time import sleep
 import pandas as pd
 import numpy as np
 
-#import cupy as cp
-#import cupyx
+# import cupy as cp
+# import cupyx
 import timeit
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import spsolve
 from matplotlib import colors
-from Solver import *
+
 
 def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, library):
+
+    if library == "pycuda":
+        import Solver
+        from Solver import cuspsolve
+    elif library == "cupy":
+        import cupy as cp
+        import cupyx
+    else:
+        import numpy as np
     myGlobalStr = ""
     print("Minimum compliance problem with OC")
     print("ndes: " + str(nelx) + " x " + str(nely))
@@ -110,7 +119,6 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
         fixed = np.union1d(
             dofs[0 : 2 * (nely + 1) : 2], np.array([2 * (nelx + 1) * (nely + 1) - 1])
         )
-    print("new fixed = ", fixed)
 
     free = np.setdiff1d(dofs, fixed)
     # Solution and RHS vectors
@@ -138,7 +146,7 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
     dv = np.ones(nely * nelx)
     dc = np.ones(nely * nelx)
     ce = np.ones(nely * nelx)
-    TotalLoops = 1
+    TotalLoops = 100
     nPrint = 20
     PrintFreq = int(TotalLoops / nPrint)
     print("PrintFreq = ", PrintFreq)
@@ -153,31 +161,20 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
         K = K[free, :][:, free]
         # Solve system
         if library == "numpy":
-            starttime = timeit.default_timer()
             u[free, 0] = spsolve(K.tocsr(), f[free, 0])
-            print("Solving time numpy:", timeit.default_timer() - starttime)
-            # print("-----------------------------------------")
-            # print("u[free, 0] = ", u[free, 0])
-            # print(u[free,0].shape)
-            # print("-----------------------------------------")
-
         #
         # Cuda solve
         #
-        else:
-            # Kcu = cupyx.scipy.sparse.coo_matrix(K)
-            # fcu = cp.array(f[free, 0], dtype=float)
-            # #print(fcu + f[free, 0])
-            # starttime = timeit.default_timer()
-            # solcu = cupyx.scipy.sparse.linalg.lsqr(Kcu, fcu) # HERE
-            # print("Solving time cupy:", timeit.default_timer() - starttime)            
-            # # print("-----------------------------------------")
-            # # with cp.cuda.Device(0):
-            # #   print(cp.asnumpy(solcu[0]))
-            # #   print(cp.asnumpy(solcu[0]).shape)
-            # # print("-----------------------------------------")
-            # u[free, 0] = cp.asnumpy(solcu[0])
+        elif library == "cupy":
+            Kcu = cupyx.scipy.sparse.coo_matrix(K)
+            fcu = cp.array(f[free, 0], dtype=float)
+            solcu = cupyx.scipy.sparse.linalg.lsqr(Kcu, fcu)  # HERE
+            u[free, 0] = cp.asnumpy(solcu[0])
+        elif library == "pycuda":
             u[free, 0] = cuspsolve(K, f[free, 0])
+        else:
+            print("Unknown library option")
+            raise
 
         # Objective and sensitivity
         ce[:] = (
@@ -208,19 +205,19 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
             x.reshape(nelx * nely, 1) - xold.reshape(nelx * nely, 1), np.inf
         )
         # Write iteration history to screen (req. Python 2.6 or newer)
-        # print(
-        #     "it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(
-        #         loop, obj, (g + volfrac * nelx * nely) / (nelx * nely), change
-        #     )
-        # )
+        print(
+            "it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(
+                loop, obj, (g + volfrac * nelx * nely) / (nelx * nely), change
+            )
+        )
         objVal = "%.2f" % obj
         volVal = "%.2f" % ((g + volfrac * nelx * nely) / (nelx * nely))
         changeVal = "%.2f" % change
         myGlobalStr = "iteration : {it} , \t objective: {obj}, \t Volume fraction: {vol}, \t change in volume: {change}".format(
             it=loop, obj=objVal, vol=volVal, change=changeVal
         )
-        #if loop % PrintFreq == 0:
-        #    print(myGlobalStr, file=fout, flush=True)
+        if loop % PrintFreq == 0:
+           print(myGlobalStr, file=fout, flush=True)
 
     return xPhys
 

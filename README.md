@@ -1,3 +1,74 @@
-# dash_app_topology
+# Topology optimization
+
+- [TL;DR](#tldr)
+- [Heading](#heading-2)
+  - [Sub-heading](#sub-heading-2)
+    - [Sub-sub-heading](#sub-sub-heading-2)
+- [pyCUDA](#heading-1)
+  - [Sparse solvers in CUDA](#sparse-solvers-in-cuda)
+
+# Heading levels
+
+> This is a fixture to test heading levels
+
+<!-- toc -->
+
+## TL;DR
+
+- This repo implements SIMP-based topology optimization for compliance minimization (aka find the stiffest possible structure under a given loading.)
+- Straightforward re-implementation of the famous [**A 99 line topology optimization code written in Matlab**](https://www.topopt.mek.dtu.dk/Apps-and-software/A-99-line-topology-optimization-code-written-in-MATLAB)
+- Uses CUDA sparse solvers for solving linear system of equations on GPU
+- A dash webapp is developed that interfaces with the backend physics. This webapp can be called directly from the `google colab`.
+- The code can be run locally from commandline as well without the webapp
+
+## Heading
+
+This is an h1 heading
+
+### Sub-heading
+
+This is an h2 heading
+
+#### Sub-sub-heading
+
+This is an h3 heading
+
 ![alt text](anim-opt.gif)
 
+## pyCUDA
+
+PyCUDA provides computational linear algebra involving vectors and multi-dimensional arrays that are
+designed to match the interface of the widely-used (CPU-based) Python array package `numpy`.
+
+### Sparse solvers in CUDA
+
+One way to solve general sparse linear systems in CUDA is using cuSOLVER.
+
+cuSOLVER has three useful routines:
+
+- `cusolverSpDcsrlsvlu`, which works for square linear systems (number of unknowns equal to the number of equations) and internally uses sparse LU factorization with partial pivoting;
+- `cusolverSpDcsrlsvqr`, which works for square linear systems (number of unknowns equal to the number of equations) and internally uses sparse QR factorization;
+- `cusolverSpDcsrlsqvqr`, which works for rectangular linear systems (number of unknowns different to the number of equations) and internally solves a least square problem.
+
+#### Notes on `cusolverSpDcsrlsvlu`
+
+Attention should be paid to two input parameters: tol and reorder. Concerning the former, if the system matrix A is singular, then some diagonal elements of the matrix U of the LU decomposition are zero. The algorithm decides for zero if |U(j,j)| < tol.
+Concerning the latter, cuSOLVER provides a reordering to reduce zero fill-in which dramactically affects the performance of LU factorization. reorder toggles between reordering (reorder=1) or not reordering (reorder=0).
+
+Attention should be paid also to an output parameter: singularity. It is -1 if A is invertible, otherwise it provides the first index j such that U(j,j)=0.
+
+#### Notes on `cusolverSpDcsrlsvqr`
+
+Attention should be paid to the same input/output parameters are before. In particular, tol is used to decide for singularity, reorder has no effect and singularity is -1 if A is invertible, otherwise it returns the first index j such that R(j,j)=0.
+
+#### Notes on `cusolverSpDcsrlsqvqr`
+
+Attention should be paid to the input parameter tol, which is used to decide the rank of A.
+
+### Sub-heading
+
+This is an h2 heading
+
+#### Sub-sub-heading
+
+This is an h3 heading

@@ -259,7 +259,7 @@ def update_plot(nclicks, bcloc, floc, nx, ny, fx, fy):
             font=dict(family="Courier New, monospace", size=18, color="White"),
         )
 
-        return [fig]
+        return fig
 
     layout = Layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
     fig = go.Figure(
@@ -419,7 +419,9 @@ def update_output_run(nclicks, floc, bcloc, nx, ny, fx, fy):
         penal = 3.0
         ft = 1  # ft==0 -> sens, ft==1 -> dens
         f = open("filename.txt", "w+")
-        xPhys = main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f)
+        xPhys = main(
+            nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, "numpy"
+        )
         f.close()
         fig = px.imshow(xPhys.reshape((nelx, nely)).T)
         # fig.update_layout(
@@ -452,6 +454,7 @@ def update_output_run(nclicks, floc, bcloc, nx, ny, fx, fy):
 # The real main driver
 if __name__ == "__main__":
     # # Default input parameters
+    # app._terminate_server_for_port("localhost", 8060)
     f = open("filename.txt", "w+")
     f.close()
-    app.run_server(debug=False, port=8050)
+    app.run_server(debug=False, port=8060)
