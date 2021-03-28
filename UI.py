@@ -163,7 +163,7 @@ app.layout = html.Div(
                             options=[
                                 {"label": "scipy", "value": "scipy"},
                                 {"label": "cupy", "value": "cupy"},
-                                {"label": "cusolver", "value": "cusolver"},
+                                {"label": "pycuda", "value": "pycuda"},
                             ],
                             value="scipy",
                         ),
