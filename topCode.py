@@ -160,7 +160,7 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
         # Remove constrained dofs from matrix
         K = K[free, :][:, free]
         # Solve system
-        if library == "numpy":
+        if library == "scipy":
             u[free, 0] = spsolve(K.tocsr(), f[free, 0])
         #
         # Cuda solve
@@ -217,7 +217,7 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
             it=loop, obj=objVal, vol=volVal, change=changeVal
         )
         if loop % PrintFreq == 0:
-           print(myGlobalStr, file=fout, flush=True)
+            print(myGlobalStr, file=fout, flush=True)
 
     return xPhys
 
@@ -280,19 +280,20 @@ def oc(nelx, nely, x, volfrac, dc, dv, g):
             l2 = lmid
     return (xnew, gt)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     nelx = 120
     nely = 60
-    volfrac=0.4
-    penal=3.0
-    rmin=5.4
-    ft=1
-    floc='tr'
-    fx=0.
-    fy=1.
-    bcloc='l'
-    f=open('filename.txt', 'w+')
-    library='numpy'
+    volfrac = 0.4
+    penal = 3.0
+    rmin = 5.4
+    ft = 1
+    floc = "tr"
+    fx = 0.0
+    fy = 1.0
+    bcloc = "l"
+    f = open("filename.txt", "w+")
+    library = "numpy"
     xPhys = main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, library)
     plt.imshow(xPhys.reshape((nelx, nely)).T)
     plt.show()

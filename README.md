@@ -17,6 +17,7 @@
 
 ## TL;DR
 
+- This repo is a POC (proof of concept) to use CUDA-based sparse solvers for GPUs.
 - This repo implements SIMP-based topology optimization for compliance minimization (aka find the stiffest possible structure under a given loading.)
 - Straightforward re-implementation of the famous [**A 99 line topology optimization code written in Matlab**](https://www.topopt.mek.dtu.dk/Apps-and-software/A-99-line-topology-optimization-code-written-in-MATLAB)
 - Uses CUDA sparse solvers for solving linear system of equations on GPU
@@ -129,4 +130,10 @@ Topology optimization can be used ubiquitously whenever there is design involved
 
 - Designing ergonomic furniture can alleviate some of these problems
 
-This can easily be formulated as a combined shape and topology optimization with stress minimization at certain regions of interest as the objective function. A finite element model for can be generated for a concept design as shown below and
+This can easily be formulated as a combined shape and topology optimization with stress minimization at certain regions of interest as the objective function. A finite element model for can be generated for a concept design shown below. (full details are out of the scope in this POC for sparse solvers on GPUs.). However it highlights the quicker one can go from concept to optimal designs through faster solvers.
+
+![alt text](chair.gif)
+
+We can divide our domain into design and non-design domain partitions and can use a combined shape and topology optimization. For this problem setting, we can come up with ergonomic designs that are easy on the body.
+
+<img src="chair_side_new.png" width="400"/>

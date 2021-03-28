@@ -37,7 +37,7 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [html.H1("nx: ")],
-                            style={"display": "inline-block", "width": "10%"},
+                            style={"display": "inline-block", "width": "25%"},
                         ),
                         html.Div(
                             [
@@ -55,7 +55,7 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [html.H1("ny: ")],
-                            style={"display": "inline-block", "width": "10%"},
+                            style={"display": "inline-block", "width": "25%"},
                         ),
                         html.Div(
                             [
@@ -70,10 +70,6 @@ app.layout = html.Div(
                                 )
                             ],
                             style={"display": "inline-block", "width": "25%"},
-                        ),
-                        html.Div(
-                            [html.Button("Draw", id="draw-data", n_clicks=0)],
-                            style={"display": "inline-block", "width": "30%"},
                         ),
                         html.Br(),
                         html.Br(),
@@ -154,8 +150,32 @@ app.layout = html.Div(
                             value="l",
                         ),
                         html.Div(id="bc-output-container"),
+                        #
+                        html.Br(),
+                        html.Br(),
+                        html.Br(),
+                        html.Div(
+                            [html.H1("Solver library: ")],
+                            style={"display": "inline-block", "width": "100%"},
+                        ),
+                        dcc.RadioItems(
+                            id="radio-solver",
+                            options=[
+                                {"label": "scipy", "value": "scipy"},
+                                {"label": "cupy", "value": "cupy"},
+                                {"label": "cusolver", "value": "cusolver"},
+                            ],
+                            value="scipy",
+                        ),
                         html.Hr(),
-                        html.Div([html.Button("Run", id="run-data", n_clicks=0)]),
+                        html.Div(
+                            [html.Button("Draw", id="draw-data", n_clicks=0)],
+                            style={"display": "inline-block", "width": "50%"},
+                        ),
+                        html.Div(
+                            [html.Button("Run", id="run-data", n_clicks=0)],
+                            style={"display": "inline-block", "width": "50%"},
+                        ),
                     ],
                 ),
                 html.Div(
@@ -399,6 +419,7 @@ def callback_func(interval):
         Input("run-data", "n_clicks"),
         dash.dependencies.Input("force-dropdown", "value"),
         dash.dependencies.Input("bc-dropdown", "value"),
+        Input("radio-solver", "value"),
     ],
     [
         State("nx", "value"),
@@ -407,7 +428,7 @@ def callback_func(interval):
         State("fy", "value"),
     ],
 )
-def update_output_run(nclicks, floc, bcloc, nx, ny, fx, fy):
+def update_output_run(nclicks, floc, bcloc, solver, nx, ny, fx, fy):
 
     ctx = dash.callback_context
     if not ctx.triggered:
@@ -424,7 +445,7 @@ def update_output_run(nclicks, floc, bcloc, nx, ny, fx, fy):
         ft = 1  # ft==0 -> sens, ft==1 -> dens
         f = open("filename.txt", "w+")
         xPhys = main(
-            nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, "numpy"
+            nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, solver
         )
         f.close()
         fig = px.imshow(xPhys.reshape((nelx, nely)).T)
@@ -455,7 +476,7 @@ def update_output_run(nclicks, floc, bcloc, nx, ny, fx, fy):
             scaleratio=1,
         )
         fig.update_layout(
-            title="Plot Title",
+            title="Optimal topology",
             legend_title="Optimal topology",
             font=dict(family="Courier New, monospace", size=18, color="White"),
         )
