@@ -19,7 +19,7 @@
 
 - This repo is a POC (proof of concept) to use CUDA-based sparse solvers on GPUs.
 - This repo implements SIMP-based topology optimization for compliance minimization (aka find the stiffest possible structure under a given loading.)
-- Contains re-implementation of the famous [**A 99 line topology optimization code written in Matlab**](https://www.topopt.mek.dtu.dk/Apps-and-software/A-99-line-topology-optimization-code-written-in-MATLAB)
+- Contains re-implementation of the famous [**A 99 line topology optimization code written in Matlab**](https://www.topopt.mek.dtu.dk/Apps-and-software/A-99-line-topology-optimization-code-written-in-MATLAB). This currently implements a 2D version and extension to 3D is trivial except the solution is computationally expensive. 
 - Uses CUDA sparse solvers for solving linear system of equations on GPU
 - Contains a dash webapp that interfaces with the backend physics. This webapp can be called directly from the `google colab`.
 - The code can be run locally from commandline as well without the webapp
