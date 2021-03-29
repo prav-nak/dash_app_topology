@@ -27,7 +27,7 @@
 
 ## Dash app
 
-![alt text](anim-opt.gif)
+![alt text](assets/images/anim-opt.gif)
 
 ## 3 ways under the hood
 
@@ -133,8 +133,8 @@ Topology optimization can be used ubiquitously whenever there is design involved
 
 This can easily be formulated as a combined shape and topology optimization with stress minimization at as the objective function. A finite element model can be generated for a concept design shown below. (full details are out of the scope in this POC for sparse solvers on GPUs.). However it highlights the quicker one can go from concept to optimal designs through faster solvers.
 
-![alt text](chair.gif)
+![alt text](assets/images/chair.gif)
 
 We can divide our domain into design and non-design domain partitions and can use a combined shape and topology optimization. For this problem setting, we can come up with ergonomic designs that are easy on the body.
 
-<img src="chair_side_new.png" width="400"/>
+<img src="assets/images/chair_side.png" width="400"/>
