@@ -26,7 +26,8 @@
 
 ## Dash app
 
-![alt text](assets/images/anim-opt.gif)
+<!-- ![alt text](assets/images/anim-opt.gif) -->
+<img src="assets/images/anim-opt.gif" width="1200">
 
 ## 3 ways under the hood
 
