@@ -1,4 +1,4 @@
-# Topology optimization
+# Topology optimization using GPU based sparse solver
 
 - [TL;DR](#tldr)
 - [Dash app](#dash)
