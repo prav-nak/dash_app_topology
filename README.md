@@ -20,7 +20,7 @@
 - This repo is a POC (proof of concept) to use CUDA-based sparse solvers for solving linear system of equations on GPUs.
 - This repo implements SIMP-based topology optimization for compliance minimization (aka find the stiffest possible structure under a given loading.)
 - Contains re-implementation of the famous [**A 99 line topology optimization code written in Matlab**](https://www.topopt.mek.dtu.dk/Apps-and-software/A-99-line-topology-optimization-code-written-in-MATLAB). This currently implements a 2D version and extension to 3D is trivial except the solution is computationally more intensive.
-- Contains a dash webapp that interfaces with the backend physics. This webapp can be served locally as well as from the `google colab`.
+- Contains a dash webapp that interfaces with the backend physics. This webapp written using ```jupyter-dash``` can be served locally as well as from the `google colab`.
 - The code can be run locally in a commandline mode.
 - For larger degrees of freedom, the CUDA version is significantly faster than CPU version using `scipy` solvers, and hence lets you do more design iterations. Typically, these PDE constrained problems are compute intensive and people often resort to MPI parallelization. With the advent of free sparse solvers GPUs and free compute environments like google colab, design can be pushed to new limits with faster turnaround times. MPI is still necessary for large sized problems (memory reasons).
 
