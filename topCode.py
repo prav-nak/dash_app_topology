@@ -1,22 +1,17 @@
 from __future__ import division
 import math
+import timeit
 import numpy as np
-from scipy.sparse import coo_matrix
-from scipy.sparse.linalg import spsolve
+import pandas as pd
+from time import sleep
 from matplotlib import colors
 import matplotlib.pyplot as plt
-from time import sleep
-import pandas as pd
-import numpy as np
-
-# import cupy as cp
-# import cupyx
-import timeit
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import spsolve
-from matplotlib import colors
 
-
+#############################################
+# Main function that optimizes the topology #
+#############################################
 def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, library):
 
     if library == "pycuda":
@@ -30,21 +25,23 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
     myGlobalStr = ""
     print("Minimum compliance problem with OC")
     print("ndes: " + str(nelx) + " x " + str(nely))
-    print(
-        "volfrac: " + str(volfrac) + ", rmin: " + str(rmin) + ", penal: " + str(penal)
-    )
+    print("volfrac: " + str(volfrac) + ", rmin: " + str(rmin) + ", penal: " + str(penal))
     print("Filter method: " + ["Sensitivity based", "Density based"][ft])
+
     # Max and min stiffness
     Emin = 1e-9
     Emax = 1.0
+
     # dofs:
     ndof = 2 * (nelx + 1) * (nely + 1)
+
     # Allocate design variables (as array), initialize and allocate sens.
     x = volfrac * np.ones(nely * nelx, dtype=float)
     xold = x.copy()
     xPhys = x.copy()
     g = 0  # must be initialized to use the NGuyen/Paulino OC approach
     dc = np.zeros((nely, nelx), dtype=float)
+
     # FE: Build the index vectors for the for coo matrix format.
     KE = lk()
     edofMat = np.zeros((nelx * nely, 8), dtype=int)
@@ -116,31 +113,36 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
             fixed.append(dofs[ind])
             fixed.append(dofs[ind + 1])
     else:
-        fixed = np.union1d(
-            dofs[0 : 2 * (nely + 1) : 2], np.array([2 * (nelx + 1) * (nely + 1) - 1])
-        )
+        fixed = np.union1d(dofs[0 : 2 * (nely + 1) : 2], np.array([2 * (nelx + 1) * (nely + 1) - 1]))
 
+    # ===========================#
+    #  Free degrees of freedom  #
+    # ===========================#
     free = np.setdiff1d(dofs, fixed)
+
     # Solution and RHS vectors
     f = np.zeros((ndof, 1), dtype=float)
     u = np.zeros((ndof, 1))
+
     # Set load
-    if floc == "tr":
+    if floc == "tr":  # top right
         f[2 * (nelx) * (nely + 1), 0] = fx  # tr
         f[2 * (nelx) * (nely + 1) + 1, 0] = fy  # tr
-    elif floc == "br":
+    elif floc == "br":  # bottom right
         f[2 * (nelx + 1) * (nely + 1) - 2, 0] = fx  # br
         f[2 * (nelx + 1) * (nely + 1) - 1, 0] = fy  # br
-    elif floc == "tl":
+    elif floc == "tl":  # top left
         f[0, 0] = fx  # tl
         f[1, 0] = fy  # tl
-    elif floc == "bl":
+    elif floc == "bl":  # bottom left
         f[2 * (nely + 1) - 2, 0] = fx  # bl
         f[2 * (nely + 1) - 1, 0] = fy  # bl
     else:
         f[1, 0] = -1  # tl
-    # Initialize plot and plot the initial design
-    # Set loop counter and gradient vectors
+
+    # =======================================#
+    # Set loop counter and gradient vectors #
+    # =======================================#
     loop = 0
     change = 1
     dv = np.ones(nely * nelx)
@@ -152,19 +154,26 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
     print("PrintFreq = ", PrintFreq)
     while change > 0.001 and loop < TotalLoops:
         loop = loop + 1
-        # Setup and solve FE problem
-        sK = (
-            (KE.flatten()[np.newaxis]).T * (Emin + (xPhys) ** penal * (Emax - Emin))
-        ).flatten(order="F")
+
+        # ============================#
+        # Setup and solve FE problem #
+        # ============================#
+        sK = ((KE.flatten()[np.newaxis]).T * (Emin + (xPhys) ** penal * (Emax - Emin))).flatten(order="F")
         K = coo_matrix((sK, (iK, jK)), shape=(ndof, ndof)).tocsc()
         # Remove constrained dofs from matrix
         K = K[free, :][:, free]
-        # Solve system
+
+        #################
+        #  Solve system #
+        #################
+        # =============#
+        # Scipy solve #
+        # =============#
         if library == "scipy":
             u[free, 0] = spsolve(K.tocsr(), f[free, 0])
-        #
-        # Cuda solve
-        #
+        # ============#
+        # Cuda solve #
+        # ============#
         elif library == "cupy":
             Kcu = cupyx.scipy.sparse.coo_matrix(K)
             fcu = cp.array(f[free, 0], dtype=float)
@@ -176,35 +185,42 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
             print("Unknown library option")
             raise
 
-        # Objective and sensitivity
-        ce[:] = (
-            np.dot(u[edofMat].reshape(nelx * nely, 8), KE)
-            * u[edofMat].reshape(nelx * nely, 8)
-        ).sum(1)
+        # ===========================#
+        #  Objective and sensitivity #
+        # ===========================#
+        ce[:] = (np.dot(u[edofMat].reshape(nelx * nely, 8), KE) * u[edofMat].reshape(nelx * nely, 8)).sum(1)
         obj = ((Emin + xPhys ** penal * (Emax - Emin)) * ce).sum()
         dc[:] = (-penal * xPhys ** (penal - 1) * (Emax - Emin)) * ce
         dv[:] = np.ones(nely * nelx)
-        # Sensitivity filtering:
+
+        # ========================#
+        # Sensitivity filtering: #
+        # ========================#
         if ft == 0:
-            dc[:] = np.asarray((H * (x * dc))[np.newaxis].T / Hs)[:, 0] / np.maximum(
-                0.001, x
-            )
+            dc[:] = np.asarray((H * (x * dc))[np.newaxis].T / Hs)[:, 0] / np.maximum(0.001, x)
         elif ft == 1:
             dc[:] = np.asarray(H * (dc[np.newaxis].T / Hs))[:, 0]
             dv[:] = np.asarray(H * (dv[np.newaxis].T / Hs))[:, 0]
-        # Optimality criteria
+
+        # ======================#
+        #  Optimality criteria #
+        # ======================#
         xold[:] = x
         (x[:], g) = oc(nelx, nely, x, volfrac, dc, dv, g)
-        # Filter design variables
+
+        # =========================#
+        # Filter design variables #
+        # =========================#
         if ft == 0:
             xPhys[:] = x
         elif ft == 1:
             xPhys[:] = np.asarray(H * x[np.newaxis].T / Hs)[:, 0]
         # Compute the change by the inf. norm
-        change = np.linalg.norm(
-            x.reshape(nelx * nely, 1) - xold.reshape(nelx * nely, 1), np.inf
-        )
-        # Write iteration history to screen (req. Python 2.6 or newer)
+        change = np.linalg.norm(x.reshape(nelx * nely, 1) - xold.reshape(nelx * nely, 1), np.inf)
+
+        # ===================================#
+        # Write iteration history to screen #
+        # ===================================#
         print(
             "it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(
                 loop, obj, (g + volfrac * nelx * nely) / (nelx * nely), change
@@ -213,8 +229,10 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
         objVal = "%.2f" % obj
         volVal = "%.2f" % ((g + volfrac * nelx * nely) / (nelx * nely))
         changeVal = "%.2f" % change
-        myGlobalStr = "iteration : {it} , \t objective: {obj}, \t Volume fraction: {vol}, \t change in volume: {change}".format(
-            it=loop, obj=objVal, vol=volVal, change=changeVal
+        myGlobalStr = (
+            "iteration : {it} , \t objective: {obj}, \t Volume fraction: {vol}, \t change in volume: {change}".format(
+                it=loop, obj=objVal, vol=volVal, change=changeVal
+            )
         )
         if loop % PrintFreq == 0:
             print(myGlobalStr, file=fout, flush=True)
@@ -222,7 +240,9 @@ def main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, fout, librar
     return xPhys
 
 
-# element stiffness matrix
+############################
+# element stiffness matrix #
+############################
 def lk():
     E = 1
     nu = 0.3
@@ -257,11 +277,14 @@ def lk():
     return KE
 
 
-# Optimality criterion
+########################
+# Optimality criterion #
+########################
 def oc(nelx, nely, x, volfrac, dc, dv, g):
     l1 = 0
     l2 = 1e9
     move = 0.2
+
     # reshape to perform vector operations
     xnew = np.zeros(nelx * nely)
     while (l2 - l1) / (l1 + l2) > 1e-3:
@@ -293,7 +316,7 @@ if __name__ == "__main__":
     fy = 1.0
     bcloc = "l"
     f = open("filename.txt", "w+")
-    library = "numpy"
+    library = "scipy"
     xPhys = main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, library)
     plt.imshow(xPhys.reshape((nelx, nely)).T)
     plt.show()

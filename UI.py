@@ -232,9 +232,7 @@ app.layout = html.Div(
                             ),
                             style={"height": "45%"},
                         ),
-                        dcc.Interval(
-                            id="my-interval", interval=1000
-                        ),  # one tick each 5 seconds
+                        dcc.Interval(id="my-interval", interval=1000),  # one tick each 5 seconds
                     ],
                 ),
             ],
@@ -404,9 +402,7 @@ def update_plot(nclicks, bcloc, floc, nx, ny, fx, fy):
     return fig
 
 
-@app.callback(
-    Output("textarea-example-output", "children"), Input("my-interval", "n_intervals")
-)
+@app.callback(Output("textarea-example-output", "children"), Input("my-interval", "n_intervals"))
 def callback_func(interval):
     with open("filename.txt", "r") as f:
         val = f.readlines()
@@ -444,9 +440,7 @@ def update_output_run(nclicks, floc, bcloc, solver, nx, ny, fx, fy):
         penal = 3.0
         ft = 1  # ft==0 -> sens, ft==1 -> dens
         f = open("filename.txt", "w+")
-        xPhys = main(
-            nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, solver
-        )
+        xPhys = main(nelx, nely, volfrac, penal, rmin, ft, floc, fx, fy, bcloc, f, solver)
         f.close()
         fig = px.imshow(xPhys.reshape((nelx, nely)).T)
         # fig.update_layout(

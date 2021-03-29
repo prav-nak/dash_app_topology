@@ -82,7 +82,8 @@ Attention should be paid to the input parameter tol, which is used to decide the
 
 ### From Google colab
 
-Google colab comes pre-installed with a lot of CUDA libraries. You can serve this dash app from within the colab notebook by using the following commands:
+Google colab comes pre-installed with a lot of CUDA libraries. Juoyter dash facilitates serving the dash app from google colab.
+You can serve this dash app from within the colab notebook by using the following commands:
 
 `!pip install -q jupyter-dash==0.3.0rc1 dash-bootstrap-components transformers`
 
